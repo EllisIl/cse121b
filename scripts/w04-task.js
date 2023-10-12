@@ -15,7 +15,12 @@ let myProfile = {
         "Game Development",
         "Making Music"
     ],
-    placesLived: []
+    placesLived: [
+        {
+            place: "Rexburg, ID",
+            length: "1 year"
+        }
+    ]
 };
 
 /* Populate Profile Object with placesLive objects */
@@ -44,7 +49,7 @@ myProfile.favoriteFoods.forEach(food => {
 
 /* Hobbies List */
 myProfile.hobbies.forEach(hobby => {
-    let ul = document.createElement('ul');
+    let ul = document.createElement('li');
     ul.textContent = hobby;
     document.querySelector('#hobbies').appendChild(ul);
 });
