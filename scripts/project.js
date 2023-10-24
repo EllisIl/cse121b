@@ -1,44 +1,28 @@
-const GENIUS_API_URL = 'https://api.genius.com';
-const GENIUS_ACCESS_TOKEN = 'GdUV96jGSy2-DDaF3EpA0wum9nZSByA7IQKfJaDe_juuQ_WWZf0kwQJoCxGtrnqE';
+const BASE_URL = "http://api.genius.com";
+const HEADERS = {
+    'Authorization': 'Bearer TOKEN'
+};
+const SONG_TITLE = "Lake Song";
+const ARTIST_NAME = "The Decemberists";
 
-function searchArtist(artistName) {
-    return fetch(`${GENIUS_API_URL}/search?q=${artistName}`, {
-        headers: {
-            'Authorization': 'Bearer ' + GENIUS_ACCESS_TOKEN
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.response && data.response.hits && data.response.hits.length) {
-            // Take the first hit (you can loop through hits if you want more songs)
-            return data.response.hits[0].result;
-        } else {
-            throw new Error('No results found.');
-        }
-    });
+async function fetchLyrics(apiPath) {
+    const songResponse = await fetch(BASE_URL + apiPath, { headers: HEADERS });
+    const songData = await songResponse.json();
+    const page = await fetch("http://genius.com" + songData.response.song.path);
+    const htmlText = await page.text();
+    const parser = new DOMParser();
+    const lyricsDiv = parser.parseFromString(htmlText, 'text/html').querySelector("div.lyrics");
+    return lyricsDiv ? lyricsDiv.innerText.trim() : "Lyrics not found";
 }
 
-function getLyrics(url) {
-    // This fetches the page and extracts lyrics. Note: This method might not always be reliable.
-    return fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`)
-        .then(response => response.json())
-        .then(data => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(data.contents, 'text/html');
-            const lyrics = doc.querySelector('.lyrics');
-            return lyrics ? lyrics.innerText.trim() : 'Lyrics not found';
-        });
+async function getSongInfo() {
+    const searchResponse = await fetch(`${BASE_URL}/search?q=${SONG_TITLE}`, { headers: HEADERS });
+    const searchData = await searchResponse.json();
+    const songInfo = searchData.response.hits.find(hit => hit.result.primary_artist.name === ARTIST_NAME);
+    return songInfo ? fetchLyrics(songInfo.result.api_path) : "Song not found";
 }
 
-// Example usage:
-searchArtist('Eminem').then(song => {
-    console.log(`Fetching lyrics for ${song.title} by ${song.primary_artist.name}`);
-    return getLyrics(song.url);
-}).then(lyrics => {
-    console.log(lyrics);
-}).catch(error => {
-    console.error(error);
-});
+getSongInfo().then(console.log);
 
 
 // code that is commented out can be used for a more advanced variant of a Markov chain but if you have small datasets, it can sometimes work better.
