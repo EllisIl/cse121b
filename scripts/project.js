@@ -1,6 +1,6 @@
 const BASE_URL = "http://api.genius.com";
 const HEADERS = {
-    'Authorization': 'Bearer TOKEN'
+    'Authorization': 'Bearer GdUV96jGSy2-DDaF3EpA0wum9nZSByA7IQKfJaDe_juuQ_WWZf0kwQJoCxGtrnqE'
 };
 const SONG_TITLE = "Lake Song";
 const ARTIST_NAME = "The Decemberists";
