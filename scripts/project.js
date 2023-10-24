@@ -1,5 +1,5 @@
 const GENIUS_API_URL = 'https://api.genius.com';
-const GENIUS_ACCESS_TOKEN = 'YOUR_GENIUS_API_KEY';
+const GENIUS_ACCESS_TOKEN = 'GdUV96jGSy2-DDaF3EpA0wum9nZSByA7IQKfJaDe_juuQ_WWZf0kwQJoCxGtrnqE';
 
 function searchArtist(artistName) {
     return fetch(`${GENIUS_API_URL}/search?q=${artistName}`, {
