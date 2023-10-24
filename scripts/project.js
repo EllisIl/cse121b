@@ -1,10 +1,53 @@
-function testChain() {
-    const textCont = 'A Markov chain or Markov process is a stochastic model describing a sequence of possible events in which the probability of each event depends only on the state attained in the previous event. Informally, this may be thought of as, "What happens next depends only on the state of affairs now." A countably infinite sequence, in which the chain moves state at discrete time steps, gives a discrete-time Markov chain. A continuous-time process is called a continuous-time Markov chain. It is named after the Russian mathematician Andrey Markov. Markov chains have many applications as statistical models of real-world processes, such as studying cruise control systems in motor vehicles, queues or lines of customers arriving at an airport, currency exchange rates and animal population dynamics. Markov processes are the basis for general stochastic simulation methods known as Markov chain Monte Carlo, which are used for simulating sampling from complex probability distributions, and have found application in Bayesian statistics, thermodynamics, statistical mechanics, physics, chemistry, economics, finance, signal processing, information theory and speech processing. The adjectives Markovian and Markov are used to describe something that is related to a Markov process.'
-
-    const generated = generateMarkovChainLyrics(textCont);
-
-    document.getElementById('generatedLyricsOutput').textContent = generated;
+async function fetchArtistID(artistName) {
+    const response = await fetch(`https://musicbrainz.org/ws/2/artist/?query=${artistName}&limit=1&fmt=json`);
+    const data = await response.json();
+    return data.artists[0].id;
 }
+
+async function fetchAllSongsByArtist(artistName) {
+    const artistID = await fetchArtistID(artistName);
+    const response = await fetch(`https://musicbrainz.org/ws/2/recording?artist=${artistID}&limit=100&fmt=json`);
+    const data = await response.json();
+    const songTitles = data.recordings.map(recording => recording.title);
+
+    // Log all song titles to the console
+    console.log("Song titles:", songTitles);
+
+    return songTitles;
+}
+
+async function fetchLyrics(artist, songTitle) {
+    try {
+        const response = await fetch(`https://api.lyrics.ovh/v1/${artist}/${songTitle}`);
+        const data = await response.json();
+        return data.lyrics;
+    } catch (error) {
+        console.error("Error fetching lyrics:", error);
+        throw error;  // Re-throwing the error to handle it in the caller function
+    }
+}
+
+async function generateLyrics() {
+    const artist = document.getElementById('artist').value;
+
+    try {
+        // Fetch song titles by the artist
+        const songs = await fetchAllSongsByArtist(artist);
+
+        // Fetch lyrics of the first song (you could loop through to fetch multiple)
+        const songLyrics = await fetchLyrics(artist, songs[0]);
+
+        // Generate Markov Chain lyrics from the fetched lyrics
+        const generatedLyrics = generateMarkovChainLyrics(songLyrics);
+
+        // Display the generated lyrics
+        document.getElementById('generatedLyricsOutput').textContent = generatedLyrics;
+
+    } catch (error) {
+        console.error("Error generating lyrics:", error);
+    }
+}
+
 
 // code that is commented out can be used for a more advanced variant of a Markov chain but if you have small datasets, it can sometimes work better.
 function generateMarkovChainLyrics(text) {
