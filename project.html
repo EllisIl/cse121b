@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About Me | CSE 121b | W02: Programming Tasks</title>
+  <title>Project | CSE 121b | W07: Project</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;600&display=swap"
@@ -26,19 +26,20 @@
   </nav>
   <main id="home">
     <div class="container">
-        <h1>Welcome to Markov Melodies</h1>
-        <p>Generate unique song lyrics based on your favorite artist's style.</p>
-        
-        <div class="input-area">
-            <input id="artist" placeholder="Enter artist name" type="text">
-            <button onclick="generateLyrics()">Generate Lyrics</button>
-        </div>
+      <h1>Welcome to Markov Melodies</h1>
+      <p>Generate unique song lyrics based on your favorite artist's style.</p>
 
-        <div class="lyrics-display">
-            <h2>Generated Lyrics:</h2>
-            <p id="generatedLyrics"></p>
-        </div>
-    </div>
+      <div class="input-area">
+          <input id="artist" placeholder="Enter artist name" type="text">
+          <input id="songTitle" placeholder="Enter song title" type="text">
+          <button onclick="generateLyrics()">Generate Lyrics</button>
+      </div>
+
+      <div class="lyrics-display">
+          <h2>Generated Lyrics:</h2>
+          <p id="generatedLyrics"></p>
+      </div>
+  </div>
   </main>
   <footer>
     &copy;<span id="year"></span> | Project | CSE 121b
