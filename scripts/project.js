@@ -1,52 +1,44 @@
-async function fetchArtistID(artistName) {
-    const response = await fetch(`https://musicbrainz.org/ws/2/artist/?query=${artistName}&limit=1&fmt=json`);
-    const data = await response.json();
-    return data.artists[0].id;
+const GENIUS_API_URL = 'https://api.genius.com';
+const GENIUS_ACCESS_TOKEN = 'YOUR_GENIUS_API_KEY';
+
+function searchArtist(artistName) {
+    return fetch(`${GENIUS_API_URL}/search?q=${artistName}`, {
+        headers: {
+            'Authorization': 'Bearer ' + GENIUS_ACCESS_TOKEN
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.response && data.response.hits && data.response.hits.length) {
+            // Take the first hit (you can loop through hits if you want more songs)
+            return data.response.hits[0].result;
+        } else {
+            throw new Error('No results found.');
+        }
+    });
 }
 
-async function fetchAllSongsByArtist(artistName) {
-    const artistID = await fetchArtistID(artistName);
-    const response = await fetch(`https://musicbrainz.org/ws/2/recording?artist=${artistID}&limit=100&fmt=json`);
-    const data = await response.json();
-    const songTitles = data.recordings.map(recording => recording.title);
-
-    // Log all song titles to the console
-    console.log("Song titles:", songTitles);
-
-    return songTitles;
+function getLyrics(url) {
+    // This fetches the page and extracts lyrics. Note: This method might not always be reliable.
+    return fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`)
+        .then(response => response.json())
+        .then(data => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(data.contents, 'text/html');
+            const lyrics = doc.querySelector('.lyrics');
+            return lyrics ? lyrics.innerText.trim() : 'Lyrics not found';
+        });
 }
 
-async function fetchLyrics(artist, songTitle) {
-    try {
-        const response = await fetch(`https://api.lyrics.ovh/v1/${artist}/${songTitle}`);
-        const data = await response.json();
-        return data.lyrics;
-    } catch (error) {
-        console.error("Error fetching lyrics:", error);
-        throw error;  // Re-throwing the error to handle it in the caller function
-    }
-}
-
-async function generateLyrics() {
-    const artist = document.getElementById('artist').value;
-
-    try {
-        // Fetch song titles by the artist
-        const songs = await fetchAllSongsByArtist(artist);
-
-        // Fetch lyrics of the first song (you could loop through to fetch multiple)
-        const songLyrics = await fetchLyrics(artist, songs[0]);
-
-        // Generate Markov Chain lyrics from the fetched lyrics
-        const generatedLyrics = generateMarkovChainLyrics(songLyrics);
-
-        // Display the generated lyrics
-        document.getElementById('generatedLyricsOutput').textContent = generatedLyrics;
-
-    } catch (error) {
-        console.error("Error generating lyrics:", error);
-    }
-}
+// Example usage:
+searchArtist('Eminem').then(song => {
+    console.log(`Fetching lyrics for ${song.title} by ${song.primary_artist.name}`);
+    return getLyrics(song.url);
+}).then(lyrics => {
+    console.log(lyrics);
+}).catch(error => {
+    console.error(error);
+});
 
 
 // code that is commented out can be used for a more advanced variant of a Markov chain but if you have small datasets, it can sometimes work better.
