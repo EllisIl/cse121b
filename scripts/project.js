@@ -52,7 +52,7 @@ async function generateLyrics() {
 
 function generateMarkovChainLyrics(text) {
     const words = text.split(' ');
-    const numWord = 100;
+    const numWord = 50;
     const markovChain = {};
 
     for (let i = 0; i < words.length - 2; i++) {
