@@ -1,82 +1,52 @@
-const BASE_URL = "https://cors-anywhere.herokuapp.com/https://api.genius.com";
-const HEADERS = {
-    'Authorization': 'Bearer ssE0vadaB3sDJxXIagoLgUTTHzyst7jMXE2CzpnTtMMENy2IdrblqmnF1dr1Li1H'
-};
+const BASE_URL = 'https://api.datamuse.com/words';  // Datamuse API
 
-async function lyricsFromSongApiPath(songApiPath) {
-    const songUrl = BASE_URL + songApiPath;
-    const songResponse = await fetch(songUrl, { headers: HEADERS });
-    const songData = await songResponse.json();
-    const path = songData.response.song.path;
+async function getRelatedWord(word) {
+    const response = await fetch(`${BASE_URL}?rel_syn=${word}`);
+    const data = await response.json();
 
-    const pageUrl = "https://genius.com" + path;
-    const pageResponse = await fetch(`https://cors-anywhere.herokuapp.com/${pageUrl}`);
-    const pageText = await pageResponse.text();
-
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(pageText, 'text/html');
-
-    const scripts = doc.querySelectorAll('script');
-    scripts.forEach(script => script.remove());
-
-    const lyricsDiv = doc.querySelector("div[data-lyrics-container]");
-    return lyricsDiv ? lyricsDiv.innerText.trim() : "Lyrics not found";
+    // Return the original word if no synonym is found, else return the first synonym
+    return (data.length > 0) ? data[0].word : word;
 }
 
-// ... (rest of the code remains the same)
+async function generateMarkovChain() {
+    const userText = document.getElementById('userText').value;
+    const words = userText.split(' ');
 
-async function generateLyrics() {
-    const artistInput = document.getElementById("artist");
-    const songTitleInput = document.getElementById("songTitle");
-
-    const ARTIST_NAME = artistInput.value;
-    const SONG_TITLE = songTitleInput.value;
-
-    const searchResponse = await fetch(`${BASE_URL}/search?q=${SONG_TITLE}`, { headers: HEADERS });
-    const searchData = await searchResponse.json();
-    const song = searchData.response.hits.find(hit => hit.result.primary_artist.name === ARTIST_NAME);
-
-    if (!song) {
-        document.getElementById("generatedLyrics").textContent = "Song not found";
-        return;
-    }
-
-    const lyrics = await lyricsFromSongApiPath(song.result.api_path);
-    const generatedLyrics = generateMarkovChainLyrics(lyrics);
-
-    document.getElementById("generatedLyrics").textContent = generatedLyrics;
-}
-
-// ... (rest of the code remains the same)
-
-
-function generateMarkovChainLyrics(text) {
-    const words = text.split(' ');
-    const numWord = 50;
     const markovChain = {};
 
-    for (let i = 0; i < words.length - 2; i++) {
+    for (let i = 0; i < words.length - 1; i++) {
         const key = words[i];
-        const value = words[i + 2];
+        const value = words[i + 1];
 
-        markovChain[key] = markovChain[key] || [];
+        if (!markovChain[key]) {
+            markovChain[key] = [];
+        }
         markovChain[key].push(value);
     }
 
+    const numWords = 100;  // Increased to 100
     const keys = Object.keys(markovChain);
     let key = keys[Math.floor(Math.random() * keys.length)];
     let result = key;
 
-    for (let i = 0; i < numWord; i++) {
-        const words = key.split(' ');
-        const nextKeyWord = markovChain[key] ? markovChain[key][Math.floor(Math.random() * markovChain[key].length)] : '';
-
-        if (nextKeyWord) {
-            result += ` ${nextKeyWord}`;
-            key = nextKeyWord;
+    for (let i = 0; i < numWords; i++) {
+        const nextWords = markovChain[key];
+        if (!nextWords) {
+            // If no next words, pick another random word to continue
+            key = keys[Math.floor(Math.random() * keys.length)];
         } else {
-            break;
+            const nextWord = nextWords[Math.floor(Math.random() * nextWords.length)];
+
+            // Use getRelatedWord once every 5 iterations (you can adjust this frequency as needed)
+            if (i % 5 === 0) {
+                const relatedWord = await getRelatedWord(nextWord);
+                result += ` ${relatedWord}`;
+                key = relatedWord;
+            } else {
+                result += ` ${nextWord}`;
+                key = nextWord;
+            }
         }
     }
-    return result;
+    document.getElementById('result').textContent = result;
 }

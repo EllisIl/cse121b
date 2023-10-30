@@ -24,23 +24,15 @@
       <li><a href="project.html" class="active">Project</a></li>
     </ul>
   </nav>
-  <main id="home">
+  <main>
     <div class="container">
-      <h1>Welcome to Markov Melodies</h1>
-      <p>Generate unique song lyrics based on your favorite artist's style.</p>
-
-      <div class="input-area">
-          <input id="artist" placeholder="Enter artist name" type="text">
-          <input id="songTitle" placeholder="Enter song title" type="text">
-          <button onclick="generateLyrics()">Generate Lyrics</button>
-      </div>
-
-      <div class="lyrics-display">
-          <h2>Generated Lyrics:</h2>
-          <p id="generatedLyrics"></p>
-      </div>
-  </div>
-  </main>
+        <h2>Markov Chain Generator</h2>
+        <textarea id="userText" rows="4" cols="50" placeholder="Enter your text here"></textarea><br><br>
+        <button onclick="generateMarkovChain()">Generate</button>
+        <h3>Generated Text:</h3>
+        <p id="result"></p>
+    </div>
+</main>
   <footer>
     &copy;<span id="year"></span> | Project | CSE 121b
   </footer>
