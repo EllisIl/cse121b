@@ -24,7 +24,7 @@ async function generateMarkovChain() {
         markovChain[key].push(value);
     }
 
-    const numWords = 100;  // Increased to 100
+    const numWords = 100;  
     const keys = Object.keys(markovChain);
     let key = keys[Math.floor(Math.random() * keys.length)];
     let result = key;
@@ -37,7 +37,7 @@ async function generateMarkovChain() {
         } else {
             const nextWord = nextWords[Math.floor(Math.random() * nextWords.length)];
 
-            // Use getRelatedWord once every 5 iterations (you can adjust this frequency as needed)
+            // Use getRelatedWord once every 5 iterations
             if (i % 5 === 0) {
                 const relatedWord = await getRelatedWord(nextWord);
                 result += ` ${relatedWord}`;
